@@ -1,7 +1,5 @@
 # Replicate Dummy Tree
 
-![Logo](path_to_logo_if_you_have_one.png)
-
 Replicate Dummy Tree is a tool tailored for the film and television industry, assisting in the archival process once a project reaches completion.
 
 ## Overview
