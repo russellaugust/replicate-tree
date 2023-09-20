@@ -64,13 +64,30 @@ def test_replicate_directories_and_store_dummy_data(tmp_path:Path):
     src_base = Path('tests/tree')
     dst_base = tmp_path / "FAKE_RAID2"
 
-    dummy_tree.process_directory(src_base, dst_base, True)
+    dummy_tree.process_directory(src_base, dst_base, metadata=True)
     
     # Check the size of the directory tree
     dst_base_size = sum(f.stat().st_size for f in dst_base.glob('**/*') if f.is_file())
     
     # if the size is greater than 0, then we know that the dummy files were created
     assert dst_base_size > 0
+
+def test_replicate_directories_and_store_dummy_data(tmp_path:Path):
+
+    src_base = Path('tests/tree')
+    dst_base = tmp_path / "FAKE_RAID2"
+
+    dummy_tree.process_directory(src_base, dst_base, files=False)
+    
+    # Check the size of the directory tree
+    dst_base_size = sum(f.stat().st_size for f in dst_base.glob('**/*') if f.is_file())
+    
+    # Count number of files and not directories
+    dst_base_files = sum(f.is_file() for f in dst_base.glob('**/*'))
+
+    # if the number of files is zero, we know that the dummy files were not created
+    assert dst_base_size == 0
+    assert dst_base_files == 0
     
 def test_extract_media_metadata_video():
     src_file = Path('tests/tree/video/test_1920x1080_none_pcm_s16le_30fps.mov')

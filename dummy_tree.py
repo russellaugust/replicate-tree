@@ -64,7 +64,7 @@ def supported_input_formats():
         return []
             
 
-def touch_and_ffprobe(src_file: Path, dst_file: Path, include_metadata=False):
+def touch_and_ffprobe(src_file: Path, dst_file: Path, metadata=False):
     """
     Touch the file in the destination directory and run ffprobe if necessary.
     """
@@ -86,19 +86,19 @@ def touch_and_ffprobe(src_file: Path, dst_file: Path, include_metadata=False):
     suffix = src_file.suffix[1:].lower()
     
     # Check if file extension matches one of the types for which we want ffprobe data
-    if suffix in videoaudio_extensions and include_metadata:
+    if suffix in videoaudio_extensions and metadata:
         # Run ffprobe with JSON output format and write its output to the touched file
         with dst_file.open('w') as f:
             result = json.dump(extract_media_metadata(src_file), f, indent=4)
 
-    elif suffix in image_extensions and include_metadata:
+    elif suffix in image_extensions and metadata:
         # Run exiftool with JSON output format and write its output to the touched file
         with dst_file.open('w') as f:
             result = json.dump(extract_image_metadata(src_file), f, indent=4)
             
 
 
-def process_directory(src_dir:Path, dst_dir:Path, include_metadata:bool=False):
+def process_directory(src_dir:Path, dst_dir:Path, files:bool=True, metadata:bool=False):
     """
     Recursively replicate the folder structure from source_dir to dest_dir, 
     touch files, and run ffprobe on certain file types.
@@ -109,9 +109,9 @@ def process_directory(src_dir:Path, dst_dir:Path, include_metadata:bool=False):
         dest_item = dst_dir / source_item.name
         
         if source_item.is_dir():
-            process_directory(source_item, dest_item, include_metadata)
-        else:
-            touch_and_ffprobe(source_item, dest_item, include_metadata)
+            process_directory(source_item, dest_item, files=files, metadata=metadata)
+        elif files:
+            touch_and_ffprobe(source_item, dest_item, metadata=metadata)
             
 
 def parse_arguments():
@@ -125,9 +125,12 @@ def parse_arguments():
                         type=Path, 
                         required=True,
                         help='Destination directory')
-    parser.add_argument('-p', '--ffprobe', 
+    parser.add_argument('-f', '--files', 
                         action='store_true',
-                        help='Will store the ffprobe data as json inside the dummy file.')
+                        help='Only rebuild the folder structure, excluding all files.')
+    parser.add_argument('-p', '--metdata', 
+                        action='store_true',
+                        help='Will store the metadata data as json inside the dummy file.')
     
     return parser.parse_args()
 
@@ -139,7 +142,7 @@ def main():
     src = Path(args.source)
     dst = Path(args.destination)
 
-    process_directory(src, dst, args.ffprobe)
+    process_directory(src, dst, args.files, args.metdata)
     
 if __name__ == '__main__':
     main()
