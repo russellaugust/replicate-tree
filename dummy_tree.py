@@ -127,8 +127,8 @@ def parse_arguments():
                         help='Destination directory')
     parser.add_argument('-f', '--files', 
                         action='store_true',
-                        help='Only rebuild the folder structure, excluding all files.')
-    parser.add_argument('-p', '--metdata', 
+                        help='Include dummy files as placeholders while rebuilding the directories.')
+    parser.add_argument('-p', '--metadata', 
                         action='store_true',
                         help='Will store the metadata data as json inside the dummy file.')
     
@@ -142,7 +142,7 @@ def main():
     src = Path(args.source)
     dst = Path(args.destination)
 
-    process_directory(src, dst, args.files, args.metdata)
+    process_directory(src, dst, args.files, args.metadata)
     
 if __name__ == '__main__':
     main()
