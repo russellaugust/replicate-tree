@@ -30,23 +30,19 @@ def extract_image_metadata(src_file: Path) -> dict:
         return {}
     
 def extract_media_metadata(src_file: Path) -> dict:
-    try:
-        result = subprocess.run(
-            ["ffprobe", "-v", "quiet", "-print_format", "json", 
-                "-show_format", "-show_streams", str(src_file)], 
-            capture_output=True, text=True, check=True)
-
-        if result.returncode == 0:
-            pass
-        elif result.returncode == 1:
-            print(f"ffprobe encountered a non-fatal error with {src_file}")
-        else:
-            print(f"ffprobe encountered an error with {src_file}")
-
-        return json.loads(result.stdout)
-    except subprocess.CalledProcessError as e:
-        print(f"Error occurred: {e}")
-        return {}
+    result = subprocess.run(
+        ["ffprobe", "-v", "quiet", "-print_format", "json", 
+            "-show_format", "-show_streams", str(src_file)], 
+        capture_output=True, text=True, check=False)
+    
+    if result.returncode == 0:
+        pass
+    elif result.returncode == 1:
+        print(f"ffprobe encountered a non-fatal error with {src_file}")
+    else:
+        print(f"ffprobe encountered an error with {src_file}")
+        
+    return json.loads(result.stdout)
     
 
 def supported_input_formats():
