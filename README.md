@@ -9,6 +9,8 @@ Upon wrapping up a project, navigating through your collection of files can get 
 ## Features
 
 - **Dummy File Creation:** Create a skeleton of your project's folder and file structure.
+
+- **Symlink Mode:** Recreate the same tree but symlink each file back to its original source path.
   
 - **Embedded Metadata:** Replicate Dummy Tree isn't just about recreating structure. It allows users to embed JSON metadata into the dummy files. This is particularly valuable for crucial file types like images, videos, and audio, ensuring that you retain some essential data about the original files.
 

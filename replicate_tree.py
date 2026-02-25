@@ -97,10 +97,18 @@ def touch_and_ffprobe(src_file: Path, dst_file: Path, metadata=False):
         # Run exiftool with JSON output format and write its output to the touched file
         with dst_file.open('w') as f:
             result = json.dump(extract_image_metadata(src_file), f, indent=4)
+
+
+def create_symlink(src_file: Path, dst_file: Path):
+    dst_file.parent.mkdir(parents=True, exist_ok=True)
+
+    if dst_file.exists() or dst_file.is_symlink():
+        dst_file.unlink()
+
+    dst_file.symlink_to(src_file.resolve())
             
 
-
-def process_directory(src_dir:Path, dst_dir:Path, files:bool=True, metadata:bool=False):
+def process_directory(src_dir:Path, dst_dir:Path, files:bool=True, metadata:bool=False, symlinks:bool=False):
     """
     Recursively replicate the folder structure from source_dir to dest_dir, 
     touch files, and run ffprobe on certain file types.
@@ -111,7 +119,9 @@ def process_directory(src_dir:Path, dst_dir:Path, files:bool=True, metadata:bool
         dest_item = dst_dir / source_item.name
         
         if source_item.is_dir():
-            process_directory(source_item, dest_item, files=files, metadata=metadata)
+            process_directory(source_item, dest_item, files=files, metadata=metadata, symlinks=symlinks)
+        elif symlinks:
+            create_symlink(source_item, dest_item)
         elif files:
             touch_and_ffprobe(source_item, dest_item, metadata=metadata)
             
@@ -130,6 +140,9 @@ def parse_arguments():
     parser.add_argument('-f', '--files', 
                         action='store_true',
                         help='Include dummy files as placeholders while rebuilding the directories.')
+    parser.add_argument('-l', '--symlinks',
+                        action='store_true',
+                        help='Include symlinks to source files while rebuilding the directories.')
     parser.add_argument('-p', '--metadata', 
                         action='store_true',
                         help='Will store the metadata data as json inside the dummy file.')
@@ -144,7 +157,7 @@ def main():
     src = Path(args.source)
     dst = Path(args.destination)
 
-    process_directory(src, dst, args.files, args.metadata)
+    process_directory(src, dst, args.files, args.metadata, args.symlinks)
     
 if __name__ == '__main__':
     main()

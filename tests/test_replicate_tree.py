@@ -18,6 +18,11 @@ def test_parse_arguments():
         args = replicate_tree.parse_arguments()
         assert args.source == Path(source)
         assert args.destination == Path(destination)
+        assert args.symlinks is False
+
+    with patch("sys.argv", ["replicate", "-s", source, "-d", destination, "--symlinks"]):
+        args = replicate_tree.parse_arguments()
+        assert args.symlinks is True
 
     # Raise error if source or destination is not specified
     with patch("sys.argv", ["replicate", "-s", source]), pytest.raises(SystemExit):
@@ -91,6 +96,21 @@ def test_replicate_directories_and_store_dummy_data(tmp_path: Path):
     # if the number of files is zero, we know that the dummy files were not created
     assert dst_base_size == 0
     assert dst_base_files == 0
+
+
+def test_replicate_directories_with_symlinks(tmp_path: Path):
+    src_base = Path("tests/tree")
+    dst_base = tmp_path / "FAKE_RAID2"
+
+    replicate_tree.process_directory(src_base, dst_base, symlinks=True)
+
+    dst_symlinks = [f for f in dst_base.glob("**/*") if f.is_symlink()]
+    src_files = [f for f in src_base.glob("**/*") if f.is_file()]
+
+    assert len(dst_symlinks) == len(src_files)
+
+    sample_link = dst_symlinks[0]
+    assert sample_link.resolve().exists()
 
 
 def test_extract_media_metadata_nonzero_exit_ffprobe():
